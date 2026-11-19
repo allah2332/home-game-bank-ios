@@ -48,7 +48,7 @@ struct ProfitChart: View {
             .chartXScale(domain: 0...max(1, points.count - 1))
             .chartXAxis {
                 AxisMarks(values: [0, max(0, points.count - 1)]) { v in
-                    AxisValueLabel {
+                    AxisValueLabel(anchor: v.index == 0 ? .topLeading : .topTrailing) {
                         if let i = v.as(Int.self), points.indices.contains(i) { Text(label(points[i].date)) }
                     }
                     .foregroundStyle(Theme.text2)

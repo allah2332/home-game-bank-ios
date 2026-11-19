@@ -68,7 +68,7 @@ struct PillPicker<T: Hashable>: View {
                 let value = options[i].0, label = options[i].1
                 Button { selection = value } label: {
                     Text(label).font(.app(14, selection == value ? .semibold : .medium)).lineLimit(1).minimumScaleFactor(0.8)
-                        .frame(maxWidth: .infinity, minHeight: 32)
+                        .padding(.horizontal, 6).frame(maxWidth: .infinity, minHeight: 32)
                         .foregroundStyle(selection == value ? Theme.onAccent : Theme.text2)
                         .background(selection == value ? Theme.accent : .clear, in: Capsule())
                 }

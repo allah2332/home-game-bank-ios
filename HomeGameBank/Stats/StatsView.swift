@@ -8,7 +8,7 @@ struct StatsView: View {
 
     @Environment(StatsStore.self) private var store
     @State private var type: TypeFilter = .all
-    @State private var mode: ViewMode = .overall
+    @State private var mode: ViewMode = LaunchOptions.value("-view").flatMap { v in SessionStats.Grouping.allCases.first { $0.rawValue.lowercased() == v } }.map { ViewMode.group($0) } ?? .overall
     @State private var adding = false
     @State private var editing: Session?
     @State private var importing = false

@@ -26,8 +26,14 @@ final class OddsModel {
 
     init() {
         if LaunchOptions.demo {
-            for (slot, text) in [(Slot.seat(0, 0), "As"), (.seat(0, 1), "Ah"), (.seat(1, 0), "Ks"), (.seat(1, 1), "Kh"),
-                                 (.board(0), "2d"), (.board(1), "7c"), (.board(2), "Jh")] {
+            let plo = LaunchOptions.plo
+            if plo { game = .plo }
+            let cards: [(Slot, String)] = plo
+                ? [(.seat(0, 0), "As"), (.seat(0, 1), "Ah"), (.seat(0, 2), "Ks"), (.seat(0, 3), "Kh"),
+                   (.seat(1, 0), "Jc"), (.seat(1, 1), "Td"), (.seat(1, 2), "9c"), (.seat(1, 3), "8d")]
+                : [(.seat(0, 0), "As"), (.seat(0, 1), "Ah"), (.seat(1, 0), "Ks"), (.seat(1, 1), "Kh"),
+                   (.board(0), "2d"), (.board(1), "7c"), (.board(2), "Jh")]
+            for (slot, text) in cards {
                 set(slot, Card(text: text)?.id)
             }
             selection = .seat(2, 0)

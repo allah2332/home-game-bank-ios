@@ -53,12 +53,15 @@ jobs:
           APP=$(find build/Build/Products -name "HomeGameBank.app" -maxdepth 3 | head -1)
           xcrun simctl install "$DEVICE" "$APP"
           mkdir -p shots
-          for TAB in odds stats; do
-            xcrun simctl launch "$DEVICE" com.homegamebank.app -demo -tab "$TAB"
+          shot() { NAME=$1; shift
+            xcrun simctl launch "$DEVICE" com.homegamebank.app -demo "$@"
             sleep 8
-            xcrun simctl io "$DEVICE" screenshot "shots/$TAB.png"
-            xcrun simctl terminate "$DEVICE" com.homegamebank.app || true
-          done
+            xcrun simctl io "$DEVICE" screenshot "shots/$NAME.png"
+            xcrun simctl terminate "$DEVICE" com.homegamebank.app || true; }
+          shot odds -tab odds
+          shot odds-plo -tab odds -plo
+          shot stats -tab stats
+          shot stats-location -tab stats -view location
 
       - name: Upload logs and screenshots
         if: always()

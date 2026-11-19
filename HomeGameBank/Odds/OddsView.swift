@@ -11,14 +11,13 @@ struct OddsView: View {
                 HStack(spacing: 8) {
                     PillPicker(options: OddsModel.Game.allCases.map { ($0, $0.rawValue) },
                                selection: Binding(get: { m.game }, set: { m.setGame($0) }))
-                        .frame(maxWidth: 170)
+                        .frame(width: 168)
                     Spacer(minLength: 0)
-                    HStack(spacing: 6) {
-                        Button("−") { m.changePlayers(by: -1) }.disabled(m.players <= 2).accessibilityLabel("One less player")
-                        Text("\(m.players)").font(.app(17, .bold)).monospacedDigit().frame(minWidth: 24)
-                        Button("+") { m.changePlayers(by: 1) }.disabled(m.players >= 10).accessibilityLabel("One more player")
+                    HStack(spacing: 4) {
+                        RoundIconButton(symbol: "minus", label: "One less player") { m.changePlayers(by: -1) }.disabled(m.players <= 2)
+                        Text("\(m.players)").font(.app(17, .bold)).monospacedDigit().frame(minWidth: 22)
+                        RoundIconButton(symbol: "plus", label: "One more player") { m.changePlayers(by: 1) }.disabled(m.players >= 10)
                     }
-                    .buttonStyle(PillButtonStyle())
                     Button("New hand") { m.reset() }.buttonStyle(PillButtonStyle())
                 }
                 DeckGrid(m: m)
@@ -30,6 +29,23 @@ struct OddsView: View {
             .padding(12)
         }
         .scrollIndicators(.hidden)
+    }
+}
+
+struct RoundIconButton: View {
+    let symbol: String
+    let label: String
+    let action: () -> Void
+    @Environment(\.isEnabled) private var enabled
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: symbol).font(.system(size: 14, weight: .bold))
+                .frame(width: 36, height: 36)
+                .foregroundStyle(enabled ? Theme.text : Theme.text2.opacity(0.5))
+                .background(Theme.fill, in: Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
     }
 }
 
