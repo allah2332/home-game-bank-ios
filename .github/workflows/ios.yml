@@ -1,0 +1,68 @@
+# Builds the app on a GitHub Mac on every push: runs the engine tests, compiles the app for the
+# iPhone simulator, then opens two screens with sample data and saves screenshots.
+name: iOS build
+
+on:
+  push:
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Xcode version
+        run: xcodebuild -version
+
+      - name: Engine tests
+        working-directory: Packages/PokerCore
+        run: swift test 2>&1 | tee ../../core-tests.log
+
+      - name: Generate Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Build for simulator
+        run: |
+          set +e
+          xcodebuild -project HomeGameBank.xcodeproj -scheme HomeGameBank -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO build > build.log 2>&1
+          status=$?
+          grep -E "error:|\*\* BUILD" build.log | head -150
+          exit $status
+
+      - name: Screenshots
+        if: success()
+        run: |
+          set -x
+          DEVICE=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; print(next(x['udid'] for k in d for x in d[k] if x['name'].startswith('iPhone 16') and 'Pro' not in x['name'] and 'Plus' not in x['name']))")
+          xcrun simctl boot "$DEVICE"
+          xcrun simctl bootstatus "$DEVICE" -b
+          APP=$(find build/Build/Products -name "HomeGameBank.app" -maxdepth 3 | head -1)
+          xcrun simctl install "$DEVICE" "$APP"
+          mkdir -p shots
+          for TAB in odds stats; do
+            xcrun simctl launch "$DEVICE" com.homegamebank.app -demo -tab "$TAB"
+            sleep 8
+            xcrun simctl io "$DEVICE" screenshot "shots/$TAB.png"
+            xcrun simctl terminate "$DEVICE" com.homegamebank.app || true
+          done
+
+      - name: Upload logs and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            build.log
+            core-tests.log
+            shots/
+          if-no-files-found: ignore
