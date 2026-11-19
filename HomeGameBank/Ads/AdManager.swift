@@ -48,11 +48,11 @@ final class AdManager: NSObject, GADFullScreenContentDelegate {
         let consent = UMPConsentInformation.sharedInstance
         do {
             try await consent.requestConsentInfoUpdate(with: UMPRequestParameters())
-            try await UMPConsentForm.loadAndPresentIfRequired(from: topController())
+            if !adCheck { try await UMPConsentForm.loadAndPresentIfRequired(from: topController()) }
         } catch {
             // Consent couldn't be checked (offline). Ads wait for a later launch.
         }
-        guard consent.canRequestAds else { return }
+        guard consent.canRequestAds || adCheck else { return }
         if !adCheck, ATTrackingManager.trackingAuthorizationStatus == .notDetermined {
             _ = await ATTrackingManager.requestTrackingAuthorization()
         }
