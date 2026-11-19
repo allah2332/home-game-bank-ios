@@ -4,6 +4,7 @@ import SwiftUI
 struct HomeGameBankApp: App {
     @State private var stats = StatsStore()
     @State private var club = ClubStore()
+    @Environment(\.scenePhase) private var phase
 
     var body: some Scene {
         WindowGroup {
@@ -13,6 +14,11 @@ struct HomeGameBankApp: App {
                 .preferredColorScheme(.dark)
                 .tint(Theme.accent)
                 .onAppear { if LaunchOptions.demo { stats.seedDemoIfEmpty() } }
+                .task { await AdManager.shared.start() }
+                .onChange(of: phase) { _, p in
+                    if p == .background { AdManager.shared.didEnterBackground() }
+                    if p == .active { AdManager.shared.didBecomeActive() }
+                }
         }
     }
 }

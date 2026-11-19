@@ -12,6 +12,12 @@ packages:
   Firebase:
     url: https://github.com/firebase/firebase-ios-sdk
     from: "11.0.0"
+  GoogleMobileAds:
+    url: https://github.com/googleads/swift-package-manager-google-mobile-ads
+    from: "11.0.0"
+  GoogleUMP:
+    url: https://github.com/googleads/swift-package-manager-google-user-messaging-platform
+    from: "2.1.0"
 settings:
   base:
     SWIFT_VERSION: "5.0"
@@ -29,6 +35,21 @@ targets:
         product: FirebaseAuth
       - package: Firebase
         product: FirebaseFirestore
+      - package: GoogleMobileAds
+        product: GoogleMobileAds
+      - package: GoogleUMP
+        product: GoogleUserMessagingPlatform
+    # Extra Info.plist keys (merged with the generated ones). Ad IDs: replace the test values below with
+    # your own from AdMob (Apps > App settings, and Ad units) before the App Store build.
+    info:
+      path: HomeGameBank/Info.plist
+      properties:
+        GADApplicationIdentifier: $(ADMOB_APP_ID)
+        AdUnitAppOpen: $(ADMOB_APP_OPEN)
+        AdUnitInterstitial: $(ADMOB_INTERSTITIAL)
+        NSUserTrackingUsageDescription: Ads can be more relevant to you. The app stays free either way.
+        SKAdNetworkItems:
+          - SKAdNetworkIdentifier: cstr6suwn9.skadnetwork
     settings:
       base:
         # Change to your own reverse-domain ID before the first App Store upload.
@@ -45,6 +66,10 @@ targets:
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         ENABLE_PREVIEWS: YES
         OTHER_LDFLAGS: "$(inherited) -ObjC"
+        # Google's public test IDs until the AdMob account exists.
+        ADMOB_APP_ID: ca-app-pub-3940256099942544~1458002511
+        ADMOB_APP_OPEN: ca-app-pub-3940256099942544/5575463023
+        ADMOB_INTERSTITIAL: ca-app-pub-3940256099942544/4411468910
 schemes:
   HomeGameBank:
     build:
