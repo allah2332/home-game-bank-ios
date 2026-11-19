@@ -38,7 +38,9 @@ final class AdManager: NSObject, GADFullScreenContentDelegate {
     }
 
     /// Off for the build server's screenshots.
-    var enabled: Bool { !LaunchOptions.demo }
+    var enabled: Bool { !LaunchOptions.demo || adCheck }
+    /// Build server check that a test ad really appears (skips the tracking question, which would block the screen).
+    private var adCheck: Bool { LaunchOptions.args.contains("-adcheck") }
 
     /// Privacy consent (required in the EU/UK), the tracking question, then the ad SDK.
     func start() async {
@@ -51,7 +53,7 @@ final class AdManager: NSObject, GADFullScreenContentDelegate {
             // Consent couldn't be checked (offline). Ads wait for a later launch.
         }
         guard consent.canRequestAds else { return }
-        if ATTrackingManager.trackingAuthorizationStatus == .notDetermined {
+        if !adCheck, ATTrackingManager.trackingAuthorizationStatus == .notDetermined {
             _ = await ATTrackingManager.requestTrackingAuthorization()
         }
         _ = await GADMobileAds.sharedInstance().start()

@@ -69,6 +69,11 @@ jobs:
           shot stats -tab stats
           shot stats-location -tab stats -view location
           shot home -tab home
+          # Ads: launch with ads on and give the test ad time to load.
+          xcrun simctl launch "$DEVICE" com.saintspoker.gamebank -demo -adcheck -tab odds
+          sleep 25
+          xcrun simctl io "$DEVICE" screenshot "shots/ad-on-open.png"
+          xcrun simctl terminate "$DEVICE" com.saintspoker.gamebank || true
 
       - name: Upload logs and screenshots
         if: always()
