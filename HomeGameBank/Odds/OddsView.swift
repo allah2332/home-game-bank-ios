@@ -7,7 +7,11 @@ struct OddsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                Text("Hand odds").font(.app(22, .bold)).foregroundStyle(Theme.text)
+                HStack {
+                    Text("Hand odds").font(.app(22, .bold)).foregroundStyle(Theme.text)
+                    Spacer()
+                    Button("New hand") { m.reset() }.buttonStyle(PillButtonStyle())
+                }
                 HStack(spacing: 8) {
                     PillPicker(options: OddsModel.Game.allCases.map { ($0, $0.rawValue) },
                                selection: Binding(get: { m.game }, set: { m.setGame($0) }))
@@ -18,7 +22,6 @@ struct OddsView: View {
                         Text("\(m.players)").font(.app(17, .bold)).monospacedDigit().frame(minWidth: 22)
                         RoundIconButton(symbol: "plus", label: "One more player") { m.changePlayers(by: 1) }.disabled(m.players >= 10)
                     }
-                    Button("New hand") { m.reset() }.buttonStyle(PillButtonStyle())
                 }
                 DeckGrid(m: m)
                 TableView(m: m)

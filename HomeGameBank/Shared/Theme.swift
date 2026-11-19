@@ -50,7 +50,7 @@ extension View {
 struct PillButtonStyle: ButtonStyle {
     var primary = false
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label.font(.app(15, .semibold))
+        configuration.label.font(.app(15, .semibold)).lineLimit(1).fixedSize()
             .padding(.horizontal, 14).frame(minHeight: 40)
             .foregroundStyle(primary ? Theme.onAccent : Theme.text)
             .background(primary ? Theme.accent : Theme.fill, in: Capsule())
