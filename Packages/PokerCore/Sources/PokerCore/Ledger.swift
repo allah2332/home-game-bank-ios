@@ -146,9 +146,14 @@ public struct Ledger: Sendable {
         public var net: Double { cashOut - buyIn }
         public var isCashedOut: Bool { cashed > 0 }
     }
+    public struct SeatEntry: Identifiable, Equatable, Sendable {
+        public var playerId: String
+        public var seat: Seat
+        public var id: String { playerId }
+    }
     public struct GameSummary: Sendable {
         /// Seats in the order players first bought in.
-        public var seats: [(playerId: String, seat: Seat)]
+        public var seats: [SeatEntry]
         public var drop: Double, hh: Double, buy: Double, out: Double
         public var onTable: Double { buy - out - drop - hh }
         public var cashouts: Int { seats.reduce(0) { $0 + $1.seat.cashed } }
@@ -203,7 +208,7 @@ public struct Ledger: Sendable {
                 out += e.amount
             }
         }
-        return GameSummary(seats: order.map { ($0, map[$0]!) }, drop: drop, hh: hh, buy: buy, out: out)
+        return GameSummary(seats: order.map { SeatEntry(playerId: $0, seat: map[$0]!) }, drop: drop, hh: hh, buy: buy, out: out)
     }
 
     public var jackpot: Pool {
@@ -257,7 +262,8 @@ public struct Ledger: Sendable {
         struct Acc { var buyIn = 0.0, out = 0.0, games = Set<String>(), bbj = 0.0, hh = 0.0, best = -Double.infinity, inAdj = 0.0, netAdj = 0.0, gamesAdj = 0, adj = 0 }
         var t: [String: Acc] = [:]
         for g in games where g.status == .closed {
-            for (pid, s) in summary(g.id).seats {
+            for x in summary(g.id).seats {
+                let pid = x.playerId, s = x.seat
                 t[pid, default: Acc()].buyIn += s.buyIn
                 t[pid, default: Acc()].out += s.cashOut
                 t[pid, default: Acc()].games.insert(g.id)

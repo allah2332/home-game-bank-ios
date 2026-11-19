@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function clubPath(code) { return /databases/$(database)/documents/clubs/$(code); }
+    function isHost(code) {
+      return signedIn() && exists(/databases/$(database)/documents/clubs/$(code)/hosts/$(request.auth.uid));
+    }
+
+    // ---------- iPhone app ----------
+    // A club is one home game. Anyone signed in (every phone signs in invisibly) can open a club
+    // by its code; only hosts can change anything.
+    match /clubs/{code} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn()
+                    && code.matches('^[A-Z]{2,8}-[A-Z0-9]{5}$')
+                    && request.resource.data.owner == request.auth.uid
+                    && request.resource.data.keys().hasOnly(['name', 'createdAt', 'owner', 'settings']);
+      allow update: if isHost(code) && request.resource.data.owner == resource.data.owner;
+      allow delete: if false;
+
+      // The host key. Only hosts can read it; only the club's creator writes it, once.
+      match /private/{doc} {
+        allow read: if isHost(code);
+        allow create: if signedIn() && doc == 'host' && get(clubPath(code)).data.owner == request.auth.uid;
+        allow update, delete: if false;
+      }
+
+      // A phone becomes a host by proving it knows the host key (or by having created the club).
+      match /hosts/{uid} {
+        allow get: if signedIn() && request.auth.uid == uid;
+        allow list: if isHost(code);
+        allow create: if signedIn() && request.auth.uid == uid
+                      && (get(clubPath(code)).data.owner == uid
+                          || request.resource.data.key == get(/databases/$(database)/documents/clubs/$(code)/private/host).data.key);
+        allow update: if false;
+        allow delete: if isHost(code);
+      }
+
+      // Players, games and the cashier log.
+      match /{sub}/{id} {
+        allow read: if signedIn() && sub in ['players', 'games', 'entries'];
+        allow write: if isHost(code) && sub in ['players', 'games', 'entries']
+                     && (request.resource == null || request.resource.data.size() < 40);
+      }
+    }
+
+    // ---------- web app (unchanged) ----------
+    match /groups/{code} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if code.matches('^[A-Z0-9-]{4,12}$')
+                    && request.resource.data.keys().hasOnly(['name', 'createdAt']);
+      allow update, delete: if false;
+
+      match /{sub}/{id} {
+        allow read: if sub in ['players', 'games', 'entries'];
+        allow create, update: if sub in ['players', 'games', 'entries']
+                              && request.resource.data.size() < 40;
+        allow delete: if sub == 'entries';
+      }
+    }
+  }
+}

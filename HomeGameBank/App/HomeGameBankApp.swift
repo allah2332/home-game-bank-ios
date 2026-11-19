@@ -3,11 +3,13 @@ import SwiftUI
 @main
 struct HomeGameBankApp: App {
     @State private var stats = StatsStore()
+    @State private var club = ClubStore()
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environment(stats)
+                .environment(club)
                 .preferredColorScheme(.dark)
                 .tint(Theme.accent)
                 .onAppear { if LaunchOptions.demo { stats.seedDemoIfEmpty() } }
