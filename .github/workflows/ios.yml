@@ -4,7 +4,11 @@ name: iOS build
 
 on:
   push:
+    branches-ignore: [ci-output]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 concurrency:
   group: ios-${{ github.ref }}
@@ -66,3 +70,16 @@ jobs:
             core-tests.log
             shots/
           if-no-files-found: ignore
+
+      # Copies the screenshots and logs to the ci-output branch so they can be read with git.
+      - name: Publish output branch
+        if: always()
+        run: |
+          mkdir -p out
+          cp -R shots out/ 2>/dev/null || true
+          cp build.log core-tests.log out/ 2>/dev/null || true
+          cd out
+          git init -q -b ci-output
+          git add -A
+          git -c user.name=ci -c user.email=ci@localhost commit -q -m "Output for ${GITHUB_SHA}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" ci-output
