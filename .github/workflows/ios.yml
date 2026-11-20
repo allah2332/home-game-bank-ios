@@ -44,7 +44,7 @@ jobs:
           set +e
           xcodebuild -project HomeGameBank.xcodeproj -scheme HomeGameBank -configuration Debug \
             -destination 'generic/platform=iOS Simulator' -derivedDataPath build -clonedSourcePackagesDirPath spm \
-            CODE_SIGNING_ALLOWED=NO build > build.log 2>&1
+            CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO build > build.log 2>&1
           status=$?
           grep -E "error:|\*\* BUILD" build.log | head -150
           exit $status
