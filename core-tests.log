@@ -1,0 +1,86 @@
+Building for debugging...
+[0/7] Write sources
+[0/7] /Users/runner/work/home-game-bank-ios/home-game-bank-ios/Packages/PokerCore/.build/arm64-apple-macosx/debug/PokerCorePackageTests.derived/runner.swift
+[0/7] Write sources
+[4/7] Write swift-version--79AA4F9932D1E87A.txt
+[6/12] Compiling PokerCore HandEvaluator.swift
+[7/12] Compiling PokerCore Ledger.swift
+[8/14] Emitting module PokerCore
+[9/14] Compiling PokerCore Card.swift
+[10/14] Compiling PokerCore Equity.swift
+[11/14] Compiling PokerCore Money.swift
+[12/14] Compiling PokerCore Sessions.swift
+[13/17] Compiling PokerCoreTests LedgerTests.swift
+[14/17] Compiling PokerCoreTests PokerCoreTests.swift
+[15/17] Emitting module PokerCoreTests
+[16/19] Emitting module PokerCorePackageTests
+[17/19] Compiling PokerCorePackageTests runner.swift
+[17/19] Write Objects.LinkFileList
+[18/19] Linking PokerCorePackageTests
+Build complete! (19.83s)
+Test Suite 'All tests' started at 2026-11-20 06:16:30.470.
+Test Suite 'PokerCorePackageTests.xctest' started at 2026-11-20 06:16:30.473.
+Test Suite 'EquityTests' started at 2026-11-20 06:16:30.473.
+Test Case '-[PokerCoreTests.EquityTests testAcesVersusKings]' started.
+Test Case '-[PokerCoreTests.EquityTests testAcesVersusKings]' passed (2.192 seconds).
+Test Case '-[PokerCoreTests.EquityTests testCancel]' started.
+Test Case '-[PokerCoreTests.EquityTests testCancel]' passed (0.024 seconds).
+Test Case '-[PokerCoreTests.EquityTests testExactChop]' started.
+Test Case '-[PokerCoreTests.EquityTests testExactChop]' passed (0.000 seconds).
+Test Case '-[PokerCoreTests.EquityTests testExactOnTheFlop]' started.
+Test Case '-[PokerCoreTests.EquityTests testExactOnTheFlop]' passed (0.009 seconds).
+Test Case '-[PokerCoreTests.EquityTests testOmahaRunsAndSumsTo100]' started.
+Test Case '-[PokerCoreTests.EquityTests testOmahaRunsAndSumsTo100]' passed (4.540 seconds).
+Test Case '-[PokerCoreTests.EquityTests testRiverSettlesIt]' started.
+Test Case '-[PokerCoreTests.EquityTests testRiverSettlesIt]' passed (0.000 seconds).
+Test Suite 'EquityTests' passed at 2026-11-20 06:16:37.239.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 6.765 (6.766) seconds
+Test Suite 'EvaluatorTests' started at 2026-11-20 06:16:37.239.
+Test Case '-[PokerCoreTests.EvaluatorTests testMatchesBruteForce]' started.
+Test Case '-[PokerCoreTests.EvaluatorTests testMatchesBruteForce]' passed (2.441 seconds).
+Test Case '-[PokerCoreTests.EvaluatorTests testNames]' started.
+Test Case '-[PokerCoreTests.EvaluatorTests testNames]' passed (0.000 seconds).
+Test Case '-[PokerCoreTests.EvaluatorTests testOmahaRules]' started.
+Test Case '-[PokerCoreTests.EvaluatorTests testOmahaRules]' passed (0.000 seconds).
+Test Case '-[PokerCoreTests.EvaluatorTests testTieBreaks]' started.
+Test Case '-[PokerCoreTests.EvaluatorTests testTieBreaks]' passed (0.000 seconds).
+Test Suite 'EvaluatorTests' passed at 2026-11-20 06:16:39.681.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 2.442 (2.442) seconds
+Test Suite 'LedgerTests' started at 2026-11-20 06:16:39.681.
+Test Case '-[PokerCoreTests.LedgerTests testBoardAndSettleAfter]' started.
+Test Case '-[PokerCoreTests.LedgerTests testBoardAndSettleAfter]' passed (0.005 seconds).
+Test Case '-[PokerCoreTests.LedgerTests testDecodesFirestoreStyleData]' started.
+Test Case '-[PokerCoreTests.LedgerTests testDecodesFirestoreStyleData]' passed (0.002 seconds).
+Test Case '-[PokerCoreTests.LedgerTests testDeletedGameDropsOut]' started.
+Test Case '-[PokerCoreTests.LedgerTests testDeletedGameDropsOut]' passed (0.000 seconds).
+Test Case '-[PokerCoreTests.LedgerTests testGameSummaryAndPot]' started.
+Test Case '-[PokerCoreTests.LedgerTests testGameSummaryAndPot]' passed (0.000 seconds).
+Test Case '-[PokerCoreTests.LedgerTests testHighHandRaceAndPayout]' started.
+Test Case '-[PokerCoreTests.LedgerTests testHighHandRaceAndPayout]' passed (0.000 seconds).
+Test Case '-[PokerCoreTests.LedgerTests testHitSharesMatchWebApp]' started.
+Test Case '-[PokerCoreTests.LedgerTests testHitSharesMatchWebApp]' passed (0.000 seconds).
+Test Suite 'LedgerTests' passed at 2026-11-20 06:16:39.688.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.007 (0.008) seconds
+Test Suite 'SessionTests' started at 2026-11-20 06:16:39.688.
+Test Case '-[PokerCoreTests.SessionTests testCumulative]' started.
+Test Case '-[PokerCoreTests.SessionTests testCumulative]' passed (0.002 seconds).
+Test Case '-[PokerCoreTests.SessionTests testGroups]' started.
+Test Case '-[PokerCoreTests.SessionTests testGroups]' passed (0.004 seconds).
+Test Case '-[PokerCoreTests.SessionTests testMoney]' started.
+Test Case '-[PokerCoreTests.SessionTests testMoney]' passed (0.000 seconds).
+Test Case '-[PokerCoreTests.SessionTests testReadsWebBackup]' started.
+Test Case '-[PokerCoreTests.SessionTests testReadsWebBackup]' passed (0.001 seconds).
+Test Case '-[PokerCoreTests.SessionTests testSpanPastMidnight]' started.
+Test Case '-[PokerCoreTests.SessionTests testSpanPastMidnight]' passed (0.000 seconds).
+Test Case '-[PokerCoreTests.SessionTests testSummaryMatchesWebApp]' started.
+Test Case '-[PokerCoreTests.SessionTests testSummaryMatchesWebApp]' passed (0.000 seconds).
+Test Suite 'SessionTests' passed at 2026-11-20 06:16:39.696.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.007 (0.008) seconds
+Test Suite 'PokerCorePackageTests.xctest' passed at 2026-11-20 06:16:39.696.
+	 Executed 22 tests, with 0 failures (0 unexpected) in 9.221 (9.223) seconds
+Test Suite 'All tests' passed at 2026-11-20 06:16:39.696.
+	 Executed 22 tests, with 0 failures (0 unexpected) in 9.221 (9.226) seconds
+◇ Test run started.
+↳ Testing Library Version: 124.4
+↳ Target Platform: arm64e-apple-macos14.0
+✔ Test run with 0 tests passed after 0.001 seconds.
