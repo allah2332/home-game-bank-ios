@@ -2,41 +2,6 @@ import SwiftUI
 import UIKit
 import PokerCore
 
-/// Home tab: the live game card, jackpot and high hand, all-time standings, and the host's settings.
-struct HomeView: View {
-    @Environment(ClubStore.self) private var club
-    var openGameTab: () -> Void
-
-    var body: some View {
-        let l = club.ledger
-        ScrollView {
-            VStack(spacing: 12) {
-                ClubHeader()
-                LiveCard(ledger: l, openGameTab: openGameTab)
-                HStack(spacing: 12) {
-                    if l.settings.bbj && club.sees(.jackpot) {
-                        StatCard(title: "Bad beat jackpot", value: Money.format(l.jackpot.balance),
-                                 foot: l.jackpot.last.map { "Last hit · \(l.name($0.playerId)) won \(Money.format($0.amount))" } ?? "\(l.jackpot.hands) hands dropped")
-                    }
-                    if l.settings.hh && club.sees(.highhand) {
-                        let g = l.openGame, prize = g?.hhPrize ?? 0
-                        StatCard(title: prize > 0 ? "High hand prize" : "High hand pot", value: Money.format(prize > 0 ? prize : l.highHandPool.balance),
-                                 foot: g.flatMap { l.highHand($0.id) }.map { "\(l.name($0.playerId)) · \(Ledger.handText($0))" } ?? "No high hand yet")
-                    }
-                }
-                if club.sees(.board) {
-                    StatCard(title: "All-time buy-ins", value: Money.format(l.allTimeBuyIns),
-                             foot: "\(l.closedGames.count) settled game\(l.closedGames.count == 1 ? "" : "s") · \(l.players.count) players")
-                    BoardCard(ledger: l)
-                }
-                if club.canEdit { HostSettings() }
-            }
-            .padding(12)
-        }
-        .scrollIndicators(.hidden)
-    }
-}
-
 struct StatCard: View {
     let title: String, value: String, foot: String
     var body: some View {
@@ -49,40 +14,7 @@ struct StatCard: View {
     }
 }
 
-private struct LiveCard: View {
-    @Environment(ClubStore.self) private var club
-    let ledger: Ledger
-    var openGameTab: () -> Void
-
-    var body: some View {
-        let g = ledger.openGame
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                Text(g?.name ?? "Current game").font(.app(15, .semibold)).foregroundStyle(Theme.text2)
-                if g != nil {
-                    Text("Live").font(.app(12, .bold)).foregroundStyle(Theme.onAccent)
-                        .padding(.horizontal, 8).padding(.vertical, 2).background(Theme.accent, in: Capsule())
-                }
-            }
-            if let g {
-                let s = ledger.summary(g.id)
-                Text(club.sees(.pot) ? Money.format(s.onTable) : "In play").font(.app(38, .bold)).monospacedDigit().foregroundStyle(Theme.text)
-                Text("Running · \(s.seats.count) player\(s.seats.count == 1 ? "" : "s")").font(.app(13)).foregroundStyle(Theme.text2)
-                Button("Open current game", action: openGameTab).buttonStyle(PillButtonStyle())
-            } else {
-                Text("—").font(.app(38, .bold)).foregroundStyle(Theme.text)
-                Text("No game running").font(.app(13)).foregroundStyle(Theme.text2)
-                if club.canEdit { Button("Start a game", action: openGameTab).buttonStyle(PillButtonStyle(primary: true)) }
-            }
-        }
-        .cardSurface()
-        .overlay(alignment: .topTrailing) {
-            Image(systemName: "suit.spade.fill").font(.system(size: 96)).foregroundStyle(.white.opacity(0.045)).padding(12)
-        }
-    }
-}
-
-private struct BoardCard: View {
+struct BoardCard: View {
     @Environment(ClubStore.self) private var club
     let ledger: Ledger
     @State private var editing: Ledger.BoardRow?
@@ -187,7 +119,7 @@ struct LabeledField: View {
 }
 
 /// Host only: game options, both codes, and what players can see.
-private struct HostSettings: View {
+struct HostSettings: View {
     @Environment(ClubStore.self) private var club
     @State private var editingSplit = false
 

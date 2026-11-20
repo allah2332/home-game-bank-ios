@@ -12,6 +12,11 @@ struct PastView: View {
         ScrollView {
             VStack(spacing: 12) {
                 ClubHeader()
+                if club.sees(.board) {
+                    StatCard(title: "All-time buy-ins", value: Money.format(l.allTimeBuyIns),
+                             foot: "\(l.closedGames.count) settled game\(l.closedGames.count == 1 ? "" : "s") · \(l.players.count) players")
+                    BoardCard(ledger: l)
+                }
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Text("Past games").font(.app(18, .bold)).foregroundStyle(Theme.text)

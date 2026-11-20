@@ -31,19 +31,17 @@ struct RootView: View {
         VStack(spacing: 0) {
             Group {
                 switch tab {
+                case .home: DashboardView(go: { tab = $0 })
                 case .odds: OddsView()
                 case .stats: StatsView()
-                case .home, .game, .past:
+                case .game, .past:
+                    // Only the game and its past games belong to a game group.
                     if club.phase != .open {
                         JoinView()
-                    } else if tab == .home {
-                        HomeView(openGameTab: { tab = .game })
-                    } else if tab == .game {
+                    } else if tab == .game || !club.sees(.past) {
                         GameView()
-                    } else if club.sees(.past) {
-                        PastView()
                     } else {
-                        HomeView(openGameTab: { tab = .game })
+                        PastView()
                     }
                 }
             }

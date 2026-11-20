@@ -25,6 +25,7 @@ struct GameView: View {
                     }
                     .cardSurface()
                 }
+                if club.canEdit { HostSettings() }
             }
             .padding(12)
         }
