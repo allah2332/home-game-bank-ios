@@ -69,6 +69,11 @@ jobs:
           shot stats -tab stats
           shot stats-location -tab stats -view location
           shot home -tab home
+          # Shared games against the real database: create a group, seat players, buy in.
+          xcrun simctl launch "$DEVICE" com.saintspoker.gamebank -demo -clubtest -tab game
+          sleep 30
+          xcrun simctl io "$DEVICE" screenshot "shots/club-game.png"
+          xcrun simctl terminate "$DEVICE" com.saintspoker.gamebank || true
           # Ads: launch with ads on and give the test ad time to load.
           xcrun simctl launch "$DEVICE" com.saintspoker.gamebank -demo -adcheck -tab odds
           sleep 25

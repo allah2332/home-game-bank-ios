@@ -67,7 +67,7 @@ private struct Toast: View {
                 .padding(.bottom, 84).padding(.horizontal, 16)
                 .transition(.opacity)
                 .task(id: m) {
-                    try? await Task.sleep(for: .seconds(2.6))
+                    try? await Task.sleep(for: .seconds(LaunchOptions.args.contains("-clubtest") ? 600 : 2.6))
                     if club.message == m { club.message = nil }
                 }
         }

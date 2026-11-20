@@ -61,11 +61,12 @@ final class ClubStore {
         do {
             uid = try await Auth.auth().signInAnonymously().user.uid
             phase = .idle
+            if LaunchOptions.args.contains("-clubtest") { await selfTest(); return }
             if let last = UserDefaults.standard.string(forKey: "lastClub"), let s = saved.first(where: { $0.code == last }) {
                 await open(s.fullCode, typed: false)
             }
         } catch {
-            phase = .unavailable("Couldn't connect. Check your internet connection and reopen the app.")
+            phase = .unavailable("Couldn't connect. Check your internet connection and reopen the app." + (LaunchOptions.args.contains("-clubtest") ? " (\(error.localizedDescription))" : ""))
         }
     }
 
@@ -140,7 +141,7 @@ final class ClubStore {
                 return
             } catch {
                 phase = .idle
-                message = "Couldn't create the game. Check your connection and try again."
+                message = "Couldn't create the game. Check your connection and try again." + (LaunchOptions.args.contains("-clubtest") ? " (\(error.localizedDescription))" : "")
                 return
             }
         }
@@ -206,6 +207,20 @@ final class ClubStore {
         })
     }
 
+    /// Build-server check against the real database: create a game group, seat three players, buy in, cash one out.
+    private func selfTest() async {
+        await create(name: "Build check")
+        guard phase == .open else { message = message ?? "Self-test: couldn't create a game group"; return }
+        let a = addPlayer("Ana"), b = addPlayer("Ben"), c = addPlayer("Cy")
+        startGame(name: "Build check", buyIn: 20, drop: 1, collectAfter: false, hhDrop: 1, hhPrize: 0, hhTimer: 0)
+        for _ in 0..<60 where ledger.openGame == nil { try? await Task.sleep(for: .milliseconds(250)) }
+        guard let g = ledger.openGame else { message = "Self-test: the game didn't sync back"; return }
+        for (p, amt) in [(a, 20.0), (b, 40.0), (c, 20.0)] { if let p { addEntry(["gameId": g.id, "playerId": p, "kind": "buyin", "amount": amt]) } }
+        if let b { addEntry(["gameId": g.id, "playerId": b, "kind": "cashout", "amount": 55]) }
+        try? await Task.sleep(for: .seconds(3))
+        message = "Self-test: \(players.count) players, \(entries.count) entries synced"
+    }
+
     // MARK: writes (hosts only; the database refuses anyone else)
 
     private func club() -> DocumentReference? { code.flatMap { db?.collection("clubs").document($0) } }
@@ -216,7 +231,8 @@ final class ClubStore {
         if let toast { message = toast }
         Task {
             do { try await op(ref) } catch {
-                await MainActor.run { self.message = "Couldn't save that. Check your connection and try again." }
+                let detail = LaunchOptions.args.contains("-clubtest") ? " (\(error.localizedDescription))" : ""
+                await MainActor.run { self.message = "Couldn't save that. Check your connection and try again." + detail }
             }
         }
     }
