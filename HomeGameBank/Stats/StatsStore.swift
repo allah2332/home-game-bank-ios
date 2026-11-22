@@ -11,6 +11,14 @@ final class StatsStore {
 
     func setStartBankroll(_ v: Double) { startBankroll = v; save() }
 
+    /// Profit goals for the calendar, by period name ("Week", "Month", "Year").
+    private(set) var goals: [String: Double] = (UserDefaults.standard.dictionary(forKey: "goals") as? [String: Double]) ?? [:]
+    func goal(for period: String) -> Double { goals[period] ?? 0 }
+    func setGoal(_ v: Double, for period: String) {
+        goals[period] = max(0, v)
+        UserDefaults.standard.set(goals, forKey: "goals")
+    }
+
     @ObservationIgnored private let url: URL
 
     init(fileName: String = "sessions.json") {
@@ -76,6 +84,13 @@ final class StatsStore {
             ("2026-11-12", "12:00", "14:00", "Deepstack", "WPT", 150, 0, 0, true),
             ("2026-11-16", "12:00", "17:00", "Deepstack", "WPT", 150, 600, 0, true),
         ]
+        let cal = Calendar.current
+        for (i, (ago, profit)) in [(1, 240.0), (3, -85), (4, 130), (6, -40), (8, 310), (11, -150), (13, 95), (15, 60), (18, -210), (20, 175), (24, 45)].enumerated() {
+            guard let d = cal.date(byAdding: .day, value: -ago, to: Date()) else { continue }
+            let buy = 200.0
+            sessions.append(Session(id: "recent\(i)", ts: 100 + Double(i), type: "cash", date: SessionStats.dateString(d), start: "19:00", end: "23:30",
+                                    mins: 270, game: "NL Texas Holdem", loc: i % 2 == 0 ? "SIENA" : "Office", buy: buy, out: buy + profit, tips: 0))
+        }
         for (i, r) in rows.enumerated() {
             sessions.append(Session(id: "demo\(i)", ts: Double(i), type: r.8 ? "tourney" : "cash", date: r.0, start: r.1, end: r.2,
                                     mins: SessionStats.spanMinutes(start: r.1, end: r.2), game: r.3, loc: r.4, buy: r.5, out: r.6, tips: r.7))

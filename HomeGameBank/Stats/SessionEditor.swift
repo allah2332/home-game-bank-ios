@@ -18,7 +18,7 @@ struct SessionEditor: View {
     @State private var tips: String
     @State private var confirmDelete = false
 
-    init(original: Session?) {
+    init(original: Session?, day: Date? = nil) {
         self.original = original
         let now = Date(), began = now.addingTimeInterval(-4 * 3600)
         func time(_ t: String, fallback: Date) -> Date {
@@ -39,7 +39,7 @@ struct SessionEditor: View {
             _tips = State(initialValue: s.tips > 0 ? Self.plain(s.tips) : "")
         } else {
             _type = State(initialValue: "cash")
-            _date = State(initialValue: began)
+            _date = State(initialValue: day ?? began)
             _start = State(initialValue: began)
             _end = State(initialValue: now)
             _game = State(initialValue: "")

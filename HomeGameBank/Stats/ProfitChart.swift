@@ -6,6 +6,7 @@ import PokerCore
 /// Touch and drag to read any session.
 struct ProfitChart: View {
     let points: [SessionStats.Point]
+    var title = "All-time profit"
     @State private var selected: Int?
 
     private static let short: DateFormatter = { let f = DateFormatter(); f.setLocalizedDateFormatFromTemplate("MMM d"); return f }()
@@ -15,7 +16,7 @@ struct ProfitChart: View {
         let last = points.last?.total ?? 0
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("All-time profit").font(.app(15, .bold)).foregroundStyle(Theme.text)
+                Text(title).font(.app(15, .bold)).foregroundStyle(Theme.text)
                 Spacer()
                 Text(Money.format(last, signed: true)).font(.app(15, .bold)).monospacedDigit().foregroundStyle(Theme.result(last))
             }

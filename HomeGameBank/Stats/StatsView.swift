@@ -5,10 +5,12 @@ import PokerCore
 struct StatsView: View {
     enum TypeFilter: String, CaseIterable { case all = "All", cash = "Cash", tourney = "Tourney" }
     enum ViewMode: Hashable { case overall, group(SessionStats.Grouping) }
+    enum Section: Hashable { case calendar, analytics }
 
     @Environment(StatsStore.self) private var store
     @State private var type: TypeFilter = .all
     @State private var mode: ViewMode = LaunchOptions.value("-view").flatMap { v in SessionStats.Grouping.allCases.first { $0.rawValue.lowercased() == v } }.map { ViewMode.group($0) } ?? .overall
+    @State private var section: Section = (LaunchOptions.value("-view") != nil || LaunchOptions.value("-section") == "analytics") ? .analytics : .calendar
     @State private var adding = false
     @State private var editing: Session?
     @State private var importing = false
@@ -28,21 +30,26 @@ struct StatsView: View {
                     Spacer()
                     Button("Add session") { adding = true }.buttonStyle(PillButtonStyle(primary: true))
                 }
+                PillPicker(options: [(Section.calendar, "Calendar"), (Section.analytics, "Analytics")], selection: $section)
                 PillPicker(options: TypeFilter.allCases.map { ($0, $0.rawValue) }, selection: $type)
-                PillPicker(options: [(ViewMode.overall, "Overall")] + SessionStats.Grouping.allCases.map { (ViewMode.group($0), $0.rawValue) }, selection: $mode)
 
                 let l = list
-                if l.isEmpty {
-                    Text("No sessions yet").font(.app(15)).foregroundStyle(Theme.text2).padding(.vertical, 8)
-                } else if case .group(let g) = mode {
-                    GroupTable(rows: SessionStats.groups(l, by: g))
+                if section == .calendar {
+                    PnLCalendar(sessions: l)
                 } else {
-                    if l.count >= 2 { ProfitChart(points: SessionStats.cumulative(l)) }
-                    Overview(summary: SessionStats.summary(l),
-                             bankroll: store.startBankroll + store.sessions.reduce(0) { $0 + $1.profit })
+                    PillPicker(options: [(ViewMode.overall, "Overall")] + SessionStats.Grouping.allCases.map { (ViewMode.group($0), $0.rawValue) }, selection: $mode)
+                    if l.isEmpty {
+                        Text("No sessions yet").font(.app(15)).foregroundStyle(Theme.text2).padding(.vertical, 8)
+                    } else if case .group(let g) = mode {
+                        GroupTable(rows: SessionStats.groups(l, by: g))
+                    } else {
+                        if l.count >= 2 { ProfitChart(points: SessionStats.cumulative(l)) }
+                        Overview(summary: SessionStats.summary(l),
+                                 bankroll: store.startBankroll + store.sessions.reduce(0) { $0 + $1.profit })
+                    }
                 }
 
-                if !l.isEmpty {
+                if section == .analytics && !l.isEmpty {
                     Text("Sessions").font(.app(15, .bold)).foregroundStyle(Theme.text).padding(.top, 8)
                     ForEach(l.sorted { $0.date != $1.date ? $0.date > $1.date : $0.ts > $1.ts }.prefix(40)) { s in
                         Button { editing = s } label: { SessionRow(s: s) }.buttonStyle(.plain)
