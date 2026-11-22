@@ -219,6 +219,49 @@ final class ClubStore {
         if let b { addEntry(["gameId": g.id, "playerId": b, "kind": "cashout", "amount": 55]) }
         try? await Task.sleep(for: .seconds(3))
         message = "Self-test: \(players.count) players, \(entries.count) entries synced"
+        if let code, let key = hostKey { await playerTest(code: code, key: key, gameId: g.id) }
+    }
+
+    /// Build-server check: a brand-new phone opens the game with the plain player code and tries to change it.
+    /// Every write must be refused by the database; reading must work. Then a third phone uses the host code.
+    private func playerTest(code: String, key: String, gameId: String) async {
+        guard let db else { return }
+        var lines: [String] = []
+        func check(_ label: String, _ ok: Bool) { lines.append((ok ? "PASS " : "FAIL ") + label) }
+        func refused(_ op: () async throws -> Void) async -> Bool {
+            do { try await op(); return false } catch { return true }
+        }
+        let hostEntries = entries.count
+        try? Auth.auth().signOut()
+        guard let player = try? await Auth.auth().signInAnonymously().user.uid else { message = "Player test: couldn't sign in"; return }
+        uid = player
+        forget(code)
+        await open(code, typed: true)
+        check("player code opens the game", phase == .open)
+        check("player code gives no host rights", !isHost && !canEdit)
+        for _ in 0..<40 where !loaded { try? await Task.sleep(for: .milliseconds(250)) }
+        check("player sees the game (\(entries.count) of \(hostEntries) entries)", entries.count == hostEntries && players.count == 3)
+        let club = db.collection("clubs").document(code)
+        check("refused: add buy-in", await refused { _ = try await club.collection("entries").addDocument(data: ["gameId": gameId, "kind": "buyin", "amount": 999, "ts": Self.now]) })
+        if let e = entries.first {
+            check("refused: delete log entry", await refused { try await club.collection("entries").document(e.id).delete() })
+        }
+        check("refused: add player", await refused { try await club.collection("players").document().setData(["name": "Hacker", "createdAt": Self.now]) })
+        check("refused: close game", await refused { try await club.collection("games").document(gameId).updateData(["status": "closed"]) })
+        check("refused: change settings", await refused { try await club.updateData(["settings": ["bbj": true, "hh": true]]) })
+        check("refused: read host key", await refused { _ = try await club.collection("private").document("host").getDocument(source: .server) })
+        check("refused: wrong host code", await refused { try await club.collection("hosts").document(player).setData(["key": "WRONG1", "at": Self.now]) })
+        check("refused: delete game group", await refused { try await club.delete() })
+        // A third phone with the real host code becomes a host.
+        try? Auth.auth().signOut()
+        if let third = try? await Auth.auth().signInAnonymously().user.uid {
+            check("host code works on another phone", !(await refused { try await club.collection("hosts").document(third).setData(["key": key, "at": Self.now]) }))
+            check("that phone can then write", !(await refused { _ = try await club.collection("entries").addDocument(data: ["gameId": gameId, "playerId": "x", "kind": "adjust", "amount": 0, "ts": Self.now]) }))
+        }
+        let fails = lines.filter { $0.hasPrefix("FAIL") }.count
+        let report = lines.joined(separator: "\n")
+        try? report.write(to: FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("clubtest.txt"), atomically: true, encoding: .utf8)
+        message = fails == 0 ? "Player test: all \(lines.count) checks passed" : "Player test: \(fails) of \(lines.count) checks FAILED"
     }
 
     // MARK: writes (hosts only; the database refuses anyone else)
