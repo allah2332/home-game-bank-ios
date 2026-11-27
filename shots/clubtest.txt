@@ -1,0 +1,13 @@
+PASS player code opens the game
+PASS player code gives no host rights
+PASS player sees the game (4 of 4 entries)
+PASS refused: add buy-in
+PASS refused: delete log entry
+PASS refused: add player
+PASS refused: close game
+PASS refused: change settings
+PASS refused: read host key
+PASS refused: wrong host code
+PASS refused: delete game group
+PASS host code works on another phone
+PASS that phone can then write
